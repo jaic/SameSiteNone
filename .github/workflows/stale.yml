@@ -1,0 +1,22 @@
+name: "Close stale issues"
+on:
+  schedule:
+  # Run this daily at 00:00
+  - cron: "0 0 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'It seems there has been no recent activity here. To avoid accumulating stale issues, this one will be closed soon.'
+        stale-pr-message: 'It seems there has been no recent activity here. To avoid accumulating stale issues, this one will be closed soon.'
+        stale-issue-label: 'stale'
+        exempt-issue-label: 
+        stale-pr-label: 'stale'
+        exempt-pr-label: 
+        days-before-stale: 30
+        days-before-close: 5
+        filter: 'milestone:Discussions' 
