@@ -22,7 +22,7 @@ export const monoPlatform: Platform = {
     return new Promise<void>((resolve, reject) => {
       attachDebuggerHotkey(loadAssemblyUrls);
 
-      // mono.js assumes the existence of this
+      // dotnet.js assumes the existence of this
       window['Browser'] = {
         init: () => { },
       };
@@ -205,7 +205,7 @@ function addScriptTagsToDocument() {
   }
 
   const scriptElem = document.createElement('script');
-  scriptElem.src = '_framework/wasm/mono.js';
+  scriptElem.src = '_framework/wasm/dotnet.js';
   scriptElem.defer = true;
   document.body.appendChild(scriptElem);
 }
@@ -229,7 +229,7 @@ function addGlobalModuleScriptTagsToDocument(callback: () => void) {
 
 function createEmscriptenModuleInstance(loadAssemblyUrls: string[], onReady: () => void, onError: (reason?: any) => void) {
   const module = {} as typeof Module;
-  const wasmBinaryFile = '_framework/wasm/mono.wasm';
+  const wasmBinaryFile = '_framework/wasm/dotnet.wasm';
   const suppressMessages = ['DEBUGGING ENABLED'];
 
   module.print = line => (suppressMessages.indexOf(line) < 0 && console.log(`WASM: ${line}`));
@@ -244,7 +244,7 @@ function createEmscriptenModuleInstance(loadAssemblyUrls: string[], onReady: () 
 
   module.locateFile = fileName => {
     switch (fileName) {
-      case 'mono.wasm': return wasmBinaryFile;
+      case 'dotnet.wasm': return wasmBinaryFile;
       default: return fileName;
     }
   };
