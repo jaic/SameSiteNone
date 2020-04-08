@@ -65,6 +65,8 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
         protected Pipe _bodyInputPipe;
         protected OutputProducer _bodyOutput;
 
+        private HeaderCollection _trailers;
+
         private const string NtlmString = "NTLM";
         private const string NegotiateString = "Negotiate";
         private const string BasicString = "Basic";
@@ -111,7 +113,17 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
 
         public IHeaderDictionary RequestHeaders { get; set; }
         public IHeaderDictionary ResponseHeaders { get; set; }
+        public IHeaderDictionary ResponseTrailers { get; set; }
         private HeaderCollection HttpResponseHeaders { get; set; }
+        private HeaderCollection HttpResponseTrailers => _trailers ??= new HeaderCollection(checkTrailers: true);
+        internal bool HasTrailers => _trailers?.Count > 0;
+
+        // Trailers are supported on this OS, it's HTTP/2, and the app added a Trailer response header to announce trailers were intended.
+        // Needed to delay the completion of Content-Length responses.
+        internal bool TrailersExpected => HasTrailers
+            || (NativeMethods.HttpSupportTrailer(_pInProcessHandler) && HttpVersion >= System.Net.HttpVersion.Version20
+                    && HttpResponseHeaders.ContainsKey(HttpKnownHeaderNames.Trailer));
+
         internal HttpApiTypes.HTTP_VERB KnownMethod { get; private set; }
 
         private bool HasStartedConsumingRequestBody { get; set; }
@@ -404,6 +416,48 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                         {
                             NativeMethods.HttpResponseSetKnownHeader(_pInProcessHandler, knownHeaderIndex, pHeaderValue, (ushort)headerValueBytes.Length, fReplace: isFirst);
                         }
+                    }
+                }
+            }
+        }
+
+        public unsafe void SetResponseTrailers()
+        {
+            HttpResponseTrailers.IsReadOnly = true;
+            foreach (var headerPair in HttpResponseTrailers)
+            {
+                var headerValues = headerPair.Value;
+
+                if (headerValues.Count == 0)
+                {
+                    continue;
+                }
+
+                string headerValue;
+                if (headerValues.Count == 1)
+                {
+                    headerValue = headerValues[0];
+                }
+                else
+                {
+                    var builder = new StringBuilder();
+                    builder.Append(headerValues[0]);
+                    for (var i = 1; i < headerValues.Count; i++)
+                    {
+                        builder.Append(',');
+                        builder.Append(headerValues[i]);
+                    }
+
+                    headerValue = builder.ToString();
+                }
+
+                var headerValueBytes = Encoding.UTF8.GetBytes(headerValue);
+                fixed (byte* pHeaderValue = headerValueBytes)
+                {
+                    var headerNameBytes = Encoding.UTF8.GetBytes(headerPair.Key);
+                    fixed (byte* pHeaderName = headerNameBytes)
+                    {
+                        NativeMethods.HttpResponseSetUnknownTrailer(_pInProcessHandler, pHeaderName, pHeaderValue, (ushort)headerValueBytes.Length);
                     }
                 }
             }

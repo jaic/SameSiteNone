@@ -169,6 +169,12 @@ namespace Microsoft.AspNetCore.Server.IIS.Core
                         // if request is done no need to flush, http.sys would do it for us
                         if (result.IsCompleted)
                         {
+                            if (HasTrailers && NativeMethods.HttpSupportTrailer(_pInProcessHandler))
+                            {
+                                SetResponseTrailers();
+                                await AsyncIO.FlushAsync(moreData: true);
+                            }
+
                             break;
                         }
 
