@@ -17,6 +17,8 @@
     * ProjectReferenceProvider = a list which maps of assembly names to the project file that produces it
  -->
 <Project>
+  <!-- The .NET SDK uses this task but only in inner builds. Needed in outer builds for ResolveCustomReferencesToProjects. -->
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.JoinItems" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <PropertyGroup>
     <EnableCustomReferenceResolution Condition="'$(EnableCustomReferenceResolution)' == '' AND ('$(DotNetBuildFromSource)' != 'true' OR '$(ExcludeFromSourceBuild)' != 'true')">true</EnableCustomReferenceResolution>
@@ -98,7 +100,7 @@
     (therefore fragile) target names.
   -->
   <Target Name="ResolveCustomReferencesToProjects"
-      Condition=" '$(TargetFramework)' != '' AND '$(EnableCustomReferenceResolution)' == 'true' AND '$(UseProjectReferences)' == 'true' "
+      Condition=" '$(EnableCustomReferenceResolution)' == 'true' AND '$(UseProjectReferences)' == 'true' "
       BeforeTargets="AssignProjectConfiguration;ResolveCustomReferences;_LoadRestoreGraphEntryPoints;_GenerateProjectRestoreGraphPerFramework;_GenerateRestoreProjectPathItemsPerFramework">
     <JoinItems Left="@(Reference)" Right="@(ProjectReferenceProvider)" LeftMetadata="*" RightMetadata="ProjectPath;RefProjectPath">
       <Output TaskParameter="JoinResult" ItemName="_ProjectReferenceByAssemblyName" />
