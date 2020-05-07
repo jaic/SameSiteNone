@@ -75,8 +75,6 @@
     <_AllowedExplicitPackageReference Include="FSharp.Core" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
     <_ExplicitPackageReference Include="@(PackageReference)" Exclude="@(_ImplicitPackageReference);@(_AllowedExplicitPackageReference)" />
 
-    <_UnusedProjectReferenceProvider Include="@(ProjectReferenceProvider)" Exclude="@(Reference)" />
-
     <_CompilationOnlyReference Condition="'$(TargetFramework)' == 'netstandard2.0'" Include="@(Reference->WithMetadataValue('NuGetPackageId','NETStandard.Library'))" />
 
     <_InvalidReferenceToNonSharedFxAssembly Condition="'$(IsAspNetCoreApp)' == 'true'"
@@ -87,26 +85,42 @@
         @(ExternalAspNetCoreAppReference);
         @(_CompilationOnlyReference);
         @(Reference->WithMetadataValue('IsSharedSource', 'true'))" />
+
     <_OriginalReferences Include="@(Reference)" />
-    <!--
-      Turn Reference items into a ProjectReference when UseProjectReferences is true.
-      Order matters. This comes before package resolution because projects should be used when possible instead of packages.
-    -->
-    <_ProjectReferenceByAssemblyName Condition="'$(UseProjectReferences)' == 'true'"
-      Include="@(ProjectReferenceProvider)"
-      Exclude="@(_UnusedProjectReferenceProvider)" />
-
-    <!-- Use ref assembly project paths for ref assembly projects -->
-    <ProjectReference Condition="'$(ReferenceImplementationAssemblies)' == 'true'" Include="@(_ProjectReferenceByAssemblyName->'%(ProjectPath)')" >
-      <IsReferenceAssembly>false</IsReferenceAssembly>
-    </ProjectReference>
-
-    <ProjectReference Condition="'$(ReferenceReferenceAssemblies)' == 'true'" Include="@(_ProjectReferenceByAssemblyName->'%(RefProjectPath)')" >
-      <IsReferenceAssembly>true</IsReferenceAssembly>
-    </ProjectReference>
-
-    <Reference Remove="@(_ProjectReferenceByAssemblyName)" />
   </ItemGroup>
+
+  <!--
+    Turn Reference items into a ProjectReference when UseProjectReferences is true. Order matters. This comes before
+    package resolution (e.g. ResolveCustomReferences) because projects should be used when possible instead of packages.
+
+    As .NET SDK changes, watch for problems in this target. The BeforeTargets list is a hack required because the SDK
+    generally assumes all @(ProjectReference) items are statically defined. Main problem is reliance on internal
+    (therefore fragile) target names.
+  -->
+  <Target Name="ResolveCustomReferencesToProjects"
+      Condition=" '$(TargetFramework)' != '' AND '$(EnableCustomReferenceResolution)' == 'true' AND '$(UseProjectReferences)' == 'true' "
+      BeforeTargets="AssignProjectConfiguration;ResolveCustomReferences;_LoadRestoreGraphEntryPoints;_GenerateProjectRestoreGraphPerFramework;_GenerateRestoreProjectPathItemsPerFramework">
+    <JoinItems Left="@(Reference)" Right="@(ProjectReferenceProvider)" LeftMetadata="*" RightMetadata="ProjectPath;RefProjectPath">
+      <Output TaskParameter="JoinResult" ItemName="_ProjectReferenceByAssemblyName" />
+    </JoinItems>
+
+    <ItemGroup>
+      <!-- Use ref assembly project paths for ref assembly projects -->
+      <ProjectReference Include="@(_ProjectReferenceByAssemblyName->'%(ProjectPath)')"
+          Condition="'$(ReferenceImplementationAssemblies)' == 'true'">
+        <IsReferenceAssembly>false</IsReferenceAssembly>
+        <ReferenceOutputAssembly Condition=" '%(_ProjectReferenceByAssemblyName.PrivateAssets)' == 'all' ">false</ReferenceOutputAssembly>
+      </ProjectReference>
+
+      <ProjectReference Include="@(_ProjectReferenceByAssemblyName->'%(RefProjectPath)')"
+          Condition="'$(ReferenceReferenceAssemblies)' == 'true'">
+        <IsReferenceAssembly>true</IsReferenceAssembly>
+        <ReferenceOutputAssembly Condition=" '%(_ProjectReferenceByAssemblyName.PrivateAssets)' == 'all' ">false</ReferenceOutputAssembly>
+      </ProjectReference>
+
+      <Reference Remove="@(_ProjectReferenceByAssemblyName)" />
+    </ItemGroup>
+  </Target>
 
   <!--
     This target resolves remaining Referene items to Packages, if possible. If not, they are left as Reference items fo the SDK to resolve.
