@@ -70,3 +70,11 @@ else
 {
     Write-Host "Node.exe not copied to $InstallDir"
 }
+if (Test-Path "package-lock.json")
+{
+    $Env:Path += ";" + $Env:HELIX_CORRELATION_PAYLOAD + "\jdk\bin"
+    Invoke-Expression "java -version"
+    Get-ChildItem -Path $InstallDir
+    Write-Host "Found package-lock.json, running $InstallDir\npm install"
+    Invoke-Expression "$InstallDir\npm.cmd install"
+}

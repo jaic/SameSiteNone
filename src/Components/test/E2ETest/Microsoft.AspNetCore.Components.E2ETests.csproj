@@ -21,7 +21,6 @@
 
     <TestDependsOnNode>true</TestDependsOnNode>
     <TestDependsOnJava>true</TestDependsOnJava>
-    <TestDependsOnYarn>true</TestDependsOnYarn>
     <TestDependsOnChrome>true</TestDependsOnChrome>
   </PropertyGroup>
 
@@ -51,7 +50,7 @@
 
   <ItemGroup>
     <HelixContent Include="package.json" />
-    <HelixContent Include="yarn.lock" />
+    <HelixContent Include="package-lock.json" />
     <HelixContent Include="..\..\..\Shared\E2ETesting\selenium-config.json" />
     <HelixContent Include="..\testassets\**\*" />
     <HelixContent Include="..\..\Blazor\testassets\StandaloneApp\**\*" />
