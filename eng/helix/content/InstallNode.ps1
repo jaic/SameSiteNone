@@ -5,17 +5,12 @@
      This script installs NodeJs from http://nodejs.org/dist on a machine. 
  .PARAMETER Version
      The version of NodeJS to install.
- .PARAMETER InstallDir
-     The directory to install NodeJS to.
  .LINK 
      https://nodejs.org/en/
  #> 
 param(
     [Parameter(Mandatory = $true)]
-    $Version,
-    
-    [Parameter(Mandatory = $true)]
-    $InstallDir
+    $Version
 )
 
 $ErrorActionPreference = 'Stop'
