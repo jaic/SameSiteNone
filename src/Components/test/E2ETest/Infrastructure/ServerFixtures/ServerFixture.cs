@@ -51,7 +51,12 @@ namespace Microsoft.AspNetCore.Components.E2ETest.Infrastructure.ServerFixtures
         {
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("helix")))
             {
-                return Path.Combine(AppContext.BaseDirectory, projectName);
+                var dir = Path.Combine(AppContext.BaseDirectory, projectName);
+                if (!Directory.Exists(dir)
+                {
+                    throw new ArgumentException($"Cannot find a sample or test site directory: '{dir}'.");
+                }
+                return dir;
             }
         
             var projects = _projects.Value;
