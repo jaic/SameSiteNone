@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Components.E2ETest.Infrastructure.ServerFixtures
                 {
                     throw new ArgumentException($"Cannot find a sample or test site directory: '{path}'.");
                 }
-                return dir;
+                return path;
             }
         
             var projects = _projects.Value;
