@@ -51,6 +51,11 @@ namespace Microsoft.AspNetCore.Components.E2ETest.Infrastructure.ServerFixtures
         {
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("helix")))
             {
+                var comma = projectName.IndexOf(",");
+                if (comma != -1)
+                {
+                     projectName = projectName.Substring(comma);
+                }
                 var path = Path.Combine(AppContext.BaseDirectory, projectName);
                 if (!Directory.Exists(path))
                 {
