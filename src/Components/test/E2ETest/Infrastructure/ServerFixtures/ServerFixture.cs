@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.Components.E2ETest.Infrastructure.ServerFixtures
                 var comma = projectName.IndexOf(",");
                 if (comma != -1)
                 {
-                     projectName = projectName.Substring(comma);
+                     projectName = projectName.Substring(0, comma);
                 }
                 var path = Path.Combine(AppContext.BaseDirectory, projectName);
                 if (!Directory.Exists(path))
