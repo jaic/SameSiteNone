@@ -12,6 +12,8 @@
     <GenerateResxSource>false</GenerateResxSource>
 
     <FixupWebAssemblyHttpHandlerReference>true</FixupWebAssemblyHttpHandlerReference>
+    
+    <BlazorCacheBootResources>false</BlazorCacheBootResources>
   </PropertyGroup>
 
   <ItemGroup>
