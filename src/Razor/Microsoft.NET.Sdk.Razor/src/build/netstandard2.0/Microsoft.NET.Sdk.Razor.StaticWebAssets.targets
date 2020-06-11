@@ -269,7 +269,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <StaticWebAsset
         Include="@(_ReferencedProjectStaticWebAssets)"
-        KeepMetadata="ContentRoot;BasePath;RelativePath;SourceId;SourceType" />
+        KeepMetadata="ContentRoot;BasePath;RelativePath;SourceId;SourceType;CopyToPublishDirectory" />
     </ItemGroup>
 
   </Target>
@@ -513,7 +513,7 @@ Copyright (c) .NET Foundation. All rights reserved.
        -->
       <_ExternalPublishStaticWebAsset
         Include="%(StaticWebAsset.FullPath)"
-        Condition="'%(SourceType)' != ''">
+        Condition="'%(SourceType)' != '' AND '%(StaticWebAsset.CopyToPublishDirectory)' != 'Never'">
 
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <RelativePath>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)','$([MSBuild]::NormalizePath('wwwroot\%(BasePath)\%(RelativePath)'))'))</RelativePath>

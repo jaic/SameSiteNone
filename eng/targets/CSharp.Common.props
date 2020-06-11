@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <Choose>
-    <When Condition="'$(UsingMicrosoftNETSdkWeb)' == 'true' OR '$(RazorSdkCurrentVersionProps)' != ''">
+    <When Condition="'$(UsingMicrosoftNETSdkWeb)' == 'true' OR '$(UsingMicrosoftNETSdkRazor)' != ''">
       <ItemGroup>
         <!--
           Use the Razor SDK as a project reference. The version of the .NET Core SDK we build with often contains a version of the Razor SDK
@@ -36,7 +36,7 @@
     </When>
   </Choose>
 
-  <Import Project="$(RepoRoot)src\Razor\Microsoft.NET.Sdk.Razor\src\build\netstandard2.0\Microsoft.NET.Sdk.Razor.props" Condition="'$(UsingMicrosoftNETSdkWeb)' == 'true' OR '$(RazorSdkCurrentVersionProps)' != ''" />
+  <Import Project="$(RepoRoot)src\Razor\Microsoft.NET.Sdk.Razor\src\build\netstandard2.0\Microsoft.NET.Sdk.Razor.props" Condition="'$(UsingMicrosoftNETSdkWeb)' == 'true' OR '$(UsingMicrosoftNETSdkRazor)' != ''" />
 
 
   <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">

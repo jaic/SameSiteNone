@@ -29,6 +29,9 @@
 
     <!-- Working around https://github.com/NuGet/Home/issues/8467 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
+
+    <!-- Turn down the compression level for brotli -->
+    <_BlazorBrotliCompressionLevel>NoCompression</_BlazorBrotliCompressionLevel>
   </PropertyGroup>
 
   <!-- Don't use the server when building in place. This locks up rzc.dll -->
@@ -40,7 +43,6 @@
     <!-- Have the SDK treat the MvcShim as an MVC assembly -->
     <_MvcAssemblyName Include="Microsoft.AspNetCore.Razor.Test.MvcShim.ClassLib" />
   </ItemGroup>
-
   <ItemGroup Condition="$(BuildingTestAppsIndependently) == 'false'">
     <PackageReference Include="Microsoft.Net.Compilers.Toolset"
         Version="$(MicrosoftNetCompilersToolsetPackageVersion)"
